@@ -100,6 +100,11 @@ The config file looks like this:
   "pingTimeoutSeconds" : 1,
   "screen": "all",
   "launchAtLogin": true,
+  "lineHeight": 2,
   "shellCommandOnStatusChange" : "echo 'Status changed to: '$STATUS' with ping time:' $PING_TIME"
 }
 ```
+
+`lineHeight` sets the thickness of the status line in points (default `2`, allowed range `1`–`200`). The change is picked up as soon as the config file is saved.
+
+> This fork adds the `lineHeight` option to the original [FuzzyIdeas/IsThereNet](https://github.com/FuzzyIdeas/IsThereNet).
