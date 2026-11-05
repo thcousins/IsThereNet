@@ -515,6 +515,9 @@ private struct Config: Codable, Equatable {
     var colors: ColorsConfig? = ColorsConfig()
     var screen: String? = "all"
     var launchAtLogin: Bool? = true
+    var lineHeight: Double? = 2 // visible thickness of the status line in points
+
+    var effectiveLineHeight: CGFloat { CGFloat(max(min(lineHeight ?? 2, 200), 1)) }
 }
 
 private var CONFIG_FS_WATCHER: FSEventStreamRef?
@@ -730,10 +733,15 @@ class Window {
         fader?.cancel()
         closer?.cancel()
 
+        // The window sits partly above the top edge of the screen: the box extends 1pt past the
+        // edge (so it reaches the very top) and there is room below it for the glow shadow.
+        let lineHeight = CONFIG.effectiveLineHeight
+        let windowHeight = lineHeight + 18
+
         let box = NSBox()
         box.boxType = .custom
         box.fillColor = color
-        box.frame = NSRect(x: 0, y: 10, width: screen.frame.width + 10, height: 3)
+        box.frame = NSRect(x: 0, y: 10, width: screen.frame.width + 10, height: lineHeight + 1)
 
         box.shadow = NSShadow()
         box.shadow!.shadowColor = color
@@ -741,12 +749,12 @@ class Window {
         box.shadow!.shadowOffset = .init(width: 0, height: -2)
 
         let containerView = NSView()
-        containerView.frame = NSRect(x: 0, y: 0, width: screen.frame.width + 10, height: 20)
+        containerView.frame = NSRect(x: 0, y: 0, width: screen.frame.width + 10, height: windowHeight)
         containerView.addSubview(box)
 
-        window.setContentSize(NSSize(width: screen.frame.width + 10, height: 20))
+        window.setContentSize(NSSize(width: screen.frame.width + 10, height: windowHeight))
         window.contentView = containerView
-        window.setFrameOrigin(NSPoint(x: screen.frame.minX - 5, y: screen.frame.maxY - 12))
+        window.setFrameOrigin(NSPoint(x: screen.frame.minX - 5, y: screen.frame.maxY - (lineHeight + 10)))
 
         window.windowController?.showWindow(nil)
         window.fade(to: 1.0) { [weak window] in
